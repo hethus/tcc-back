@@ -1,0 +1,20 @@
+{
+    "userNotFound": "Usuário não foi encontrado.",
+    "pageNotFound": "Desculpe. Página não encontrada.",
+    "stepNotFound": "Etapa não encontrada.",
+    "taskNotFound": "Tarefa não encontrada.",
+    "templateNotFound": "Template não encontrado.",
+  
+    "notAuthorized": "Não autorizado.",
+    "tokenExpired": "Sessão expirada.",
+    "invalidToken": "Token inválido.",
+
+    "noData": "Dados não informados.",
+    "noUser": "Usuário não encontrado.",
+    "noEmail": "E-mail não foi informado",
+    "noPassword": "Senha não foi informada.",
+    "invalidEmail": "O e-mail informado é inválido.",
+    "uniqueEmail": "O e-mail informado já está cadastrado.",
+    "invalidCredentials": "Usuário e/ou senha inválidos."
+  }
+  
