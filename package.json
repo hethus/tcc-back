@@ -41,6 +41,8 @@
     "sequelize": "^6.21.2"
   },
   "devDependencies": {
-    "prisma": "^4.5.0"
+    "@mermaid-js/mermaid-cli": "^9.2.2",
+    "prisma": "^4.5.0",
+    "prisma-erd-generator": "^1.2.4"
   }
 }

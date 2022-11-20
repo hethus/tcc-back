@@ -53,7 +53,7 @@ const logout = (req, res, next) => {
     .then((user) =>
       User.update({
         where: { email: user.email },
-        data: { ...user, token: '' },
+        data: { token: null },
       })
     )
     .then(() => res.json({ logout: true }))
