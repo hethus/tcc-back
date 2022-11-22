@@ -18,8 +18,6 @@ export class AuthService {
   async login(dto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = dto;
 
-    console.log(dto);
-
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
@@ -37,6 +35,10 @@ export class AuthService {
     const isHashValid = await bcrypt.compare(password, user.password);
     if (!isHashValid) {
       throw new UnauthorizedException('Email ou senha inválidos');
+    }
+
+    if (user.newUser) {
+      throw new UnauthorizedException('Usuário novo, por favor crie uma senha');
     }
 
     const token = this.jwtService.sign({ id: user.id, email, name: user.name });

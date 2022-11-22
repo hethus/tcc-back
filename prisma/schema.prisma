@@ -36,6 +36,7 @@ model User {
   forms        Form[]
   givenClasses UserGivenClasses[]
   userType     String
+  newUser      Boolean               @default(true)
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt @default(now())
 }

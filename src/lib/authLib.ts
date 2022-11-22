@@ -20,7 +20,6 @@ const isAllowed = (allowAudience: string[], user: User) => {
 
 const isAllowedOrIsMe = (allowAudience: string, user: User, id: string) => {
   if (id && id === user?.id) {
-    console.log('isAllowedOrIsMe: is me');
     return;
   }
 

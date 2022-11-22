@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Put,
   Param,
   Delete,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,6 +17,7 @@ import { isAllowed, isAllowedOrIsMe } from 'src/lib/authLib';
 import { LoggedUser } from 'src/auth/logged-user.decorator';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { CreatePasswordDto } from './dto/create-password.dto';
 
 const { userType } = enums;
 
@@ -34,6 +35,12 @@ export class UserController {
     return this.userService.create(dto);
   }
 
+  @Patch('first-access/:email')
+  @ApiOperation({ summary: 'Change password for new user' })
+  firstAccess(@Param('email') email: string, @Body() dto: CreatePasswordDto) {
+    return this.userService.firstAccess(email, dto);
+  }
+
   /*   @Get()
   findAll() {
     return this.userService.findAll();
@@ -41,10 +48,10 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   } */
 
-  @Put(':id')
+  @Patch(':id')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user' })

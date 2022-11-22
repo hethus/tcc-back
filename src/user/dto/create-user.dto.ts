@@ -19,13 +19,13 @@ export class CreateUserDto {
   })
   email: string;
 
-  @IsString()
+  /*   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'User password',
     example: 'teste',
   })
-  password: string;
+  password: string; */
 
   @IsString()
   @IsNotEmpty()

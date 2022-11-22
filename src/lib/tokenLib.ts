@@ -8,7 +8,7 @@ const jwtSecret = process.env.SECRET;
 const verifyPassword = (password, hash) => bcrypt.compare(password, hash);
 const generateRandomToken = async () => crypto.randomBytes(20).toString('hex');
 */
-const generatePasswordHash = (password) => {
+const generatePasswordHash = (password: string): Promise<string> => {
   const saltRounds = 10;
   return bcrypt.hash(password, saltRounds);
 };
