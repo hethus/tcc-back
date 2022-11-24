@@ -10,7 +10,7 @@ import { PassportModule } from '@nestjs/passport';
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.SECRET,
       signOptions: { expiresIn: '30m' },
     }),
   ],

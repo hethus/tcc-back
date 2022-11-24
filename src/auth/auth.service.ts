@@ -4,9 +4,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto, LogoutResponseDto } from './dto/response';
 import * as bcrypt from 'bcrypt';
-import { validateData } from 'src/utils/helper';
+import { cryptUrl, validateData } from 'src/utils/helper';
 import { handleError } from 'src/utils/errorHandlers/customErrorList';
 import { User } from 'src/user/entities/user.entity';
+import crypto from 'crypto-js';
 
 @Injectable()
 export class AuthService {
@@ -33,12 +34,41 @@ export class AuthService {
     } */
 
     const isHashValid = await bcrypt.compare(password, user.password);
+
     if (!isHashValid) {
       throw new UnauthorizedException('Email ou senha inválidos');
     }
 
     if (user.newUser) {
-      throw new UnauthorizedException('Usuário novo, por favor crie uma senha');
+      const token = this.jwtService.sign(
+        {
+          id: user.id,
+          email,
+          name: user.name,
+          registration: user.registration,
+        },
+        {
+          expiresIn: '30m',
+        },
+      );
+
+      const tokenCrypt = crypto.AES.encrypt(
+        token,
+        process.env.JWT_NEW_USER_SECRET,
+      ).toString();
+
+      const tokenUrl = await cryptUrl(tokenCrypt);
+
+      await this.prisma.user.update({
+        where: { email: user.email },
+        data: { tokenChange: tokenCrypt },
+      });
+
+      return {
+        login: false,
+        message: 'Usuário novo, por favor crie uma senha',
+        tokenUrl,
+      };
     }
 
     const token = this.jwtService.sign({ id: user.id, email, name: user.name });
@@ -54,6 +84,7 @@ export class AuthService {
     }); */
 
     return {
+      login: true,
       token,
     };
   }

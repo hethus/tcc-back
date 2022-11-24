@@ -31,6 +31,7 @@ model User {
   name         String
   password     String
   token        String?
+  tokenChange  String?
   registration String                @unique
   takenclasses UsersSubjectClasses[]
   forms        Form[]

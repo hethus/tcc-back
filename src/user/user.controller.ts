@@ -18,6 +18,7 @@ import { LoggedUser } from 'src/auth/logged-user.decorator';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { CreatePasswordDto } from './dto/create-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 const { userType } = enums;
 
@@ -30,15 +31,37 @@ export class UserController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new user' })
-  create(@Body() dto: CreateUserDto, @LoggedUser() user: User) {
-    isAllowed([userType.admin.value, userType.teacher.value], user);
-    return this.userService.create(dto);
+  create(@Body() dto: CreateUserDto, @LoggedUser() userLogged: User) {
+    isAllowed([userType.admin.value, userType.teacher.value], userLogged);
+    return this.userService.create(dto, userLogged);
   }
 
-  @Patch('first-access/:email')
+  @Patch('first-access/:tokenCrypt')
   @ApiOperation({ summary: 'Change password for new user' })
-  firstAccess(@Param('email') email: string, @Body() dto: CreatePasswordDto) {
-    return this.userService.firstAccess(email, dto);
+  firstAccess(
+    @Param('tokenCrypt') tokenCrypt: string,
+    @Body() dto: CreatePasswordDto,
+  ) {
+    return this.userService.firstAccess(tokenCrypt, dto);
+  }
+
+  @Get('recovery/verify/:email')
+  @ApiOperation({
+    summary: 'Send email to recovery password',
+  })
+  sendEmailForgotPassword(@Param('email') email: string): Promise<string> {
+    return this.userService.sendEmailForgotPassword(email);
+  }
+
+  @Patch('recovery/password/:tokenCrypt')
+  @ApiOperation({
+    summary: 'Recover user password',
+  })
+  changePassword(
+    @Param('tokenCrypt') tokenCrypt: string,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    return this.userService.changePassword(tokenCrypt, dto);
   }
 
   /*   @Get()

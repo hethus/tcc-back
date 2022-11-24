@@ -6,6 +6,7 @@ export class User {
   registration?: string;
   userType?: 'admin' | 'teacher' | 'student';
   token?: string;
+  tokenChange?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
