@@ -108,10 +108,23 @@ export class UserService {
   /*   findAll() {
     return `This action returns all user`;
   }
+  */
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  } */
+  async findLogged(user: User) {
+    const userLogged = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!userLogged) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const { password: userPassword, ...userData } = await validateData(
+      userLogged,
+    );
+
+    return userData;
+  }
 
   async firstAccess(tokenCrypt: string, dto: CreatePasswordDto) {
     try {
