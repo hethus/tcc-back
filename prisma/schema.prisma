@@ -16,13 +16,14 @@ generator erd {
 }
 
 model SubjectClass {
-  id          String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String
-  subjectName String
-  subjectId   Int
-  semester    String
-  students    UsersSubjectClasses[]
-  teachers    UserGivenClasses[]
+  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String // nome da turma
+  subjectName         String // nome da disciplina
+  subjectId           Int
+  semester            String
+  teacher             User                  @relation(fields: [teacherId], references: [id])
+  teacherId           String                @db.Uuid
+  UsersSubjectClasses UsersSubjectClasses[]
 }
 
 model User {
@@ -35,51 +36,40 @@ model User {
   registration String                @unique
   takenclasses UsersSubjectClasses[]
   forms        Form[]
-  givenClasses UserGivenClasses[]
   userType     String
   newUser      Boolean               @default(true)
   createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt @default(now())
-}
-
-model UserGivenClasses {
-  user         User                  @relation(fields: [userId], references: [id])
-  userId       String                @db.Uuid // relation scalar field (used in the `@relation` attribute above)
-  givenClass   SubjectClass          @relation(fields: [givenClassId], references: [id])
-  givenClassId String                @db.Uuid // relation scalar field (used in the `@relation` attribute above)
-  assignedAt   DateTime              @default(now())
-  assignedBy   String
-
-  @@id([userId, givenClassId])
+  updatedAt    DateTime              @default(now()) @updatedAt
+  SubjectClass SubjectClass[]
 }
 
 model UsersSubjectClasses {
-  user           User                @relation(fields: [userId], references: [id])
-  userId         String              @db.Uuid // relation scalar field (used in the `@relation` attribute above)
-  subjectClass   SubjectClass        @relation(fields: [subjectClassId], references: [id])
-  subjectClassId String              @db.Uuid // relation scalar field (used in the `@relation` attribute above)
-  assignedAt     DateTime            @default(now())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String       @db.Uuid // relation scalar field (used in the `@relation` attribute above)
+  subjectClass   SubjectClass @relation(fields: [subjectClassId], references: [id])
+  subjectClassId String       @db.Uuid // relation scalar field (used in the `@relation` attribute above)
+  assignedAt     DateTime     @default(now())
   assignedBy     String
 
   @@id([userId, subjectClassId])
 }
 
 model Form {
-  id          String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
   status      String
   type        String
-  isTemplate  Boolean
+  isTemplate  Boolean // apagar
   questions   Question[]
-  user        User                   @relation(fields: [userId], references: [id])
-  userId      String                 @db.Uuid
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt @default(now())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String     @db.Uuid
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
 }
 
 model Question {
-  id             String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   singleAnswer   Boolean
   title          String
   subtitle       String?
@@ -90,7 +80,7 @@ model Question {
   exhibitionMode String
   type           String
   mandatory      Boolean
-  form           Form                @relation(fields: [formId], references: [id])
-  formId         String              @db.Uuid
+  form           Form    @relation(fields: [formId], references: [id])
+  formId         String  @db.Uuid
   options        Json?
 }
