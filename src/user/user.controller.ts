@@ -68,11 +68,15 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
+  */
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
-  } */
+  @Get()
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get logged user' })
+  findLogged(@LoggedUser() user: User) {
+    return this.userService.findLogged(user);
+  }
 
   @Patch(':id')
   @UseGuards(AuthGuard())
