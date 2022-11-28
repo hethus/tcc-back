@@ -126,6 +126,18 @@ export class UserService {
     return userData;
   }
 
+  async findOne(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return user;
+  }
+
   async firstAccess(tokenCrypt: string, dto: CreatePasswordDto) {
     try {
       if (!tokenCrypt) {

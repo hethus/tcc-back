@@ -78,6 +78,15 @@ export class UserController {
     return this.userService.findLogged(user);
   }
 
+  @Get(':email')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user by email' })
+  findOne(@Param('email') email: string, @LoggedUser() userLogged: User) {
+    isAllowed([userType.admin.value, userType.teacher.value], userLogged);
+    return this.userService.findOne(email);
+  }
+
   @Patch(':id')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()

@@ -48,6 +48,6 @@ export class AuthController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   profile(@LoggedUser() user: User) {
-    return { message: `${user.name} successfully logged in!` };
+    return { message: `User successfully logged in!` };
   }
 }
