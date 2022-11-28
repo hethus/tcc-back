@@ -58,9 +58,7 @@ model Form {
   id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
-  status      String
-  type        String
-  isTemplate  Boolean // apagar
+  random      Boolean
   questions   Question[]
   user        User       @relation(fields: [userId], references: [id])
   userId      String     @db.Uuid
@@ -74,10 +72,9 @@ model Question {
   title          String
   subtitle       String?
   style          Json?
-  feedback       String?
+  random         Boolean
   image          String?
   order          Float
-  exhibitionMode String
   type           String
   mandatory      Boolean
   form           Form    @relation(fields: [formId], references: [id])
