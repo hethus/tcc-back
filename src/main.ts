@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -18,10 +19,11 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Sami API')
     .setDescription('Projeto de TCC.')
-    .setVersion('1.0.0')
+    .setVersion('1.0.2')
     .addTag('Status')
     .addTag('Auth')
     .addTag('Users')
+    .addTag('Classes')
     .addTag('Public')
     .addBearerAuth()
     .build();
