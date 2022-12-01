@@ -80,4 +80,6 @@ model Question {
   form           Form    @relation(fields: [formId], references: [id])
   formId         String  @db.Uuid
   options        Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
 }

@@ -81,7 +81,7 @@ export class UserController {
   @Get(':email')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user by email' })
+  @ApiOperation({ summary: 'Get user by user email' })
   findOne(@Param('email') email: string, @LoggedUser() userLogged: User) {
     isAllowed([userType.admin.value, userType.teacher.value], userLogged);
     return this.userService.findOne(email);
@@ -103,7 +103,7 @@ export class UserController {
   @Delete(':id')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Remove a user' })
+  @ApiOperation({ summary: 'Delete a user' })
   remove(@Param('id') id: string, @LoggedUser() user: User) {
     return this.userService.remove(id, user);
   }
