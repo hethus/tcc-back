@@ -36,6 +36,28 @@ const isAllowedOrIsMe = (allowAudience: string, user: User, id: string) => {
   }
 };
 
+const isAllowedOrIsMeEmail = (
+  allowAudience: string,
+  user: User,
+  email: string,
+) => {
+  if (email && email === user?.email) {
+    return;
+  }
+
+  const _allowAudience = Array.isArray(allowAudience)
+    ? allowAudience
+    : [allowAudience];
+
+  if (!user) {
+    throw new UnauthorizedException('Usuário não autorizado.');
+  }
+
+  if (!_allowAudience.includes(user.userType)) {
+    throw new UnauthorizedException('Usuário não autorizado.');
+  }
+};
+
 const checkUserHierarchy = (req, res, next) => {
   const { user, params } = req;
 
@@ -54,4 +76,4 @@ const checkUserHierarchy = (req, res, next) => {
   return next();
 };
 
-export { isAllowed, isAllowedOrIsMe, checkUserHierarchy };
+export { isAllowed, isAllowedOrIsMe, checkUserHierarchy, isAllowedOrIsMeEmail };

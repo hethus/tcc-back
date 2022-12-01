@@ -126,6 +126,18 @@ export class UserService {
     return userData;
   }
 
+  async findOne(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return user;
+  }
+
   async firstAccess(tokenCrypt: string, dto: CreatePasswordDto) {
     try {
       if (!tokenCrypt) {
@@ -274,7 +286,7 @@ export class UserService {
       from: `TCC <${process.env.USER_EMAIL}>`,
       to: user.email,
       subject: 'Alteração de senha',
-      text: `altere a senha aqui: {AREA EM DESENVOLVIMENTO} localhost/user/change-password/${tokenToUrl}`,
+      text: `altere a senha aqui: {AREA EM DESENVOLVIMENTO} http://localhost:3000/changePassword/${tokenToUrl}`,
     };
 
     transporter.sendMail(mailData, async function (err, info) {
@@ -292,7 +304,7 @@ export class UserService {
       data: { tokenChange: tokenCrypt },
     });
 
-    return 'Email enviado com sucesso';
+    return 'Email enviado com sucesso, verifique sua caixa de entrada!';
   }
 
   async changePassword(
@@ -380,7 +392,7 @@ export class UserService {
             console.log(info);
           }
         });
-        return { message: 'Senha alterada com sucesso' };
+        return { message: 'Senha alterada com sucesso, faça login!' };
       })
       .catch(handleError);
   }
@@ -391,13 +403,98 @@ export class UserService {
     }
 
     try {
-      await validateData(dto);
-      const data = await this.prisma.user.update({
+      const userVerify = await this.prisma.user.findUnique({
         where: { id },
-        data: dto,
       });
-      const { password: userPassword, ...user } = await validateData(data);
-      return user;
+
+      if (!userVerify) {
+        throw new BadRequestException('Usuário não encontrado');
+      }
+
+      if (!dto.email) {
+        const data = await this.prisma.user.update({
+          where: { id },
+          data: dto,
+        });
+        const { password: userPassword, ...user } = await validateData(data);
+        return user;
+      }
+
+      if (dto.email) {
+        const registration = dto.registration || userVerify.registration;
+
+        const data = {
+          email: dto.email,
+          userType: dto.userType || userVerify.userType,
+          name: dto.name || userVerify.name,
+          registration,
+          password: await tokenLib.generatePasswordHash(registration),
+          newUser: true,
+        };
+
+        return this.prisma.user
+          .update({
+            where: { id },
+            data,
+          })
+          .then(async ({ password, ...updatedUser }) => {
+            const token = this.jwtService.sign(
+              {
+                id: updatedUser.id,
+                email: updatedUser.email,
+                name: updatedUser.name,
+                registration: updatedUser.registration,
+              },
+              {
+                expiresIn: '2h',
+              },
+            );
+
+            const tokenCrypt = crypto.AES.encrypt(
+              token,
+              process.env.JWT_NEW_USER_SECRET,
+            ).toString();
+
+            const tokenUrl = await cryptUrl(tokenCrypt);
+
+            await this.prisma.user.update({
+              where: { email: updatedUser.email },
+              data: { tokenChange: tokenCrypt },
+            });
+
+            const transporter = nodemailer.createTransport({
+              host: 'smtp.gmail.com',
+              port: 587,
+              service: 'gmail',
+              secure: true,
+              auth: {
+                user: process.env.USER_EMAIL,
+                pass: process.env.USER_PASSWORD,
+              },
+            });
+
+            const mailData = {
+              from: `TCC <${process.env.USER_EMAIL}>`,
+              to: updatedUser.email,
+              subject: 'Alteração de email',
+              text: `Olá ${updatedUser.name}, seu cadastro foi atualizado, como o email foi alterado, sua senha foi resetada também. Sua senha é ${updatedUser.registration}
+                      aproveite e valide a sua senha aqui: {AREA EM DESENVOLVIMENTO} localhost/user/first-access/${tokenUrl}.`, // aqui vai a url do front que aponta para a rota firstAccess, se o user n respeitar isso e tentar fazer login, o front vai redirecionar para a mesma pagina de cadastro de senha
+            };
+
+            transporter.sendMail(mailData, function (err, info) {
+              if (err) {
+                console.log(err);
+
+                throw new BadRequestException('Error sending email');
+              } else {
+                console.log(info);
+              }
+            });
+
+            return updatedUser;
+          })
+          .catch(handleError);
+      }
     } catch (error) {
       return handleError(error);
     }

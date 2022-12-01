@@ -25,14 +25,6 @@ export class AuthService {
       throw new UnauthorizedException('Email ou senha inválidos');
     }
 
-    /*     if (!user.isVerified) {
-      throw new UnauthorizedException('User not verified');
-    }
-
-    if (user.isDeleted === true) {
-      throw new UnauthorizedException('User deleted');
-    } */
-
     const isHashValid = await bcrypt.compare(password, user.password);
 
     if (!isHashValid) {
@@ -75,13 +67,8 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { email: user.email },
-      data: { token },
+      data: { token, tokenChange: null },
     });
-
-    /*     await this.prisma.user.update({
-      where: { id: user.id },
-      data: { resetToken: null },
-    }); */
 
     return {
       login: true,
