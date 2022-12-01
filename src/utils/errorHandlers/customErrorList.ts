@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import locale from './en.json';
 import { UnprocessableEntityException } from '@nestjs/common';
 
