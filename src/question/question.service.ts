@@ -93,11 +93,6 @@ export class QuestionService {
           order: dto.order,
           type: dto.type,
           mandatory: dto.mandatory,
-          form: {
-            connect: {
-              id: dto.formId,
-            },
-          },
           options: dto.options,
         },
       })

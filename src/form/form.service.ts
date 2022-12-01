@@ -86,9 +86,9 @@ export class FormService {
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
     const data = {
-      name: dto.name ? dto.name : form.name,
-      description: dto.description ? dto.description : form.description,
-      random: dto.random ? dto.random : form.random,
+      name: dto.name,
+      description: dto.description,
+      random: dto.random,
     };
 
     return await this.prisma.form
