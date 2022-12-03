@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString, IsNumber } from 'class-validator';
 import { ObjectValidator } from './questions-json.decorator';
 
-export class CreateQuestionDto {
+export class CreateManyQuestionDto {
   @IsBoolean()
   @IsNotEmpty()
   @ApiProperty({
@@ -35,7 +28,7 @@ export class CreateQuestionDto {
   subtitle?: string;
 
   @ObjectValidator()
-  @IsOptional()
+  @IsNotEmpty()
   @ApiProperty({
     description: 'Question style',
     example: {
@@ -43,7 +36,7 @@ export class CreateQuestionDto {
       backgroundColor: 'blue',
     },
   })
-  style?: object;
+  style?: any;
 
   @IsBoolean()
   @IsNotEmpty()
@@ -84,14 +77,6 @@ export class CreateQuestionDto {
     example: true,
   })
   mandatory: boolean;
-
-  @IsUUID()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'form id to connect',
-    example: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p',
-  })
-  formId: string;
 
   @ObjectValidator()
   @IsNotEmpty()

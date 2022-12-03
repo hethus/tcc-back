@@ -2,39 +2,39 @@ import { Injectable } from '@nestjs/common';
 import {
   ValidationOptions,
   registerDecorator,
-  ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  ValidationArguments,
 } from 'class-validator';
 
-export function ObjectValidator(validationOptions?: ValidationOptions) {
+export function ArrayValidator(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
-      name: 'ObjectValidator',
+      name: 'ArrayValidator',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      validator: ObjectValidatorRule,
+      validator: ArrayValidatorRule,
     });
   };
 }
 
-@ValidatorConstraint({ name: 'ObjectValidator', async: true })
+@ValidatorConstraint({ name: 'ArrayValidator', async: true })
 @Injectable()
-export class ObjectValidatorRule implements ValidatorConstraintInterface {
+export class ArrayValidatorRule implements ValidatorConstraintInterface {
   async validate(value: any) {
     try {
-      if (typeof value !== 'object') {
-        return false;
+      if (Array.isArray(value)) {
+        return true;
       }
 
-      return true;
+      return false;
     } catch (e) {
       return false;
     }
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `${args.property} must be a valid JSON`;
+    return `${args.property} must be a array`;
   }
 }

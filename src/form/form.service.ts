@@ -25,6 +25,38 @@ export class FormService {
       .create({
         data,
       })
+      .then(async (form) => {
+        if (!dto.questions || dto.questions.length === 0) {
+          return form;
+        }
+
+        await this.prisma.question.createMany({
+          data: dto.questions.map((question) => {
+            return {
+              ...question,
+              formId: form.id,
+            };
+          }),
+        });
+
+        return await this.prisma.form
+          .findUnique({
+            where: {
+              id: form.id,
+            },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              random: true,
+              createdAt: true,
+              updatedAt: true,
+              questions: true,
+              userId: true,
+            },
+          })
+          .catch(handleError);
+      })
       .catch(handleError);
   }
 
