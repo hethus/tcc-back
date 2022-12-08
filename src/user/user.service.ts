@@ -287,7 +287,7 @@ export class UserService {
       from: `TCC <${process.env.USER_EMAIL}>`,
       to: user.email,
       subject: 'Alteração de senha',
-      text: `altere a senha aqui: {AREA EM DESENVOLVIMENTO} localhost/user/change-password/${tokenToUrl}`,
+      text: `altere a senha aqui: {AREA EM DESENVOLVIMENTO} http://localhost:3000/changePassword/${tokenToUrl}`,
     };
 
     transporter.sendMail(mailData, async function (err, info) {
@@ -305,7 +305,7 @@ export class UserService {
       data: { tokenChange: tokenCrypt },
     });
 
-    return 'Email enviado com sucesso';
+    return 'Email enviado com sucesso, verifique sua caixa de entrada!';
   }
 
   async changePassword(
@@ -393,7 +393,7 @@ export class UserService {
             console.log(info);
           }
         });
-        return { message: 'Senha alterada com sucesso' };
+        return { message: 'Senha alterada com sucesso, faça login!' };
       })
       .catch(handleError);
   }
