@@ -93,5 +93,5 @@ export class CreateManyQuestionDto {
       },
     ],
   })
-  options?: any;
+  options?: object;
 }
