@@ -37,18 +37,19 @@ export class ClassesRelationController {
     return this.classesRelationService.create(dto, userLogged);
   }
 
-  @Get()
-  findAll() {
-    return this.classesRelationService.findAll();
-  }
-
   @Get(':id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Find a relation' })
   findOne(@Param('id') id: string) {
-    return this.classesRelationService.findOne(+id);
+    return this.classesRelationService.findOne(id);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a relation' })
   delete(@Param('id') id: string) {
-    return this.classesRelationService.delete(+id);
+    return this.classesRelationService.delete(id);
   }
 }
