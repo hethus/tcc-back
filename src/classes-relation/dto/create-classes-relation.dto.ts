@@ -5,8 +5,16 @@ export class CreateClassesRelationDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: '',
+    description: 'Id do professor',
     example: '',
   })
-  assignedBy: string;
+  userId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Id da sala criada',
+    example: '',
+  })
+  subjectClassId: string;
 }
