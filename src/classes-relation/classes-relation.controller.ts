@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { LoggedUser } from 'src/auth/logged-user.decorator';
 import { isAllowed } from 'src/lib/authLib';
-import { ClassesRelationService } from './classes-relation.service';
 import { User } from 'src/user/entities/user.entity';
 import enums from '../lib/enumLib';
+import { ClassesRelationService } from './classes-relation.service';
 import { CreateClassesRelationDto } from './dto/create-classes-relation.dto';
-import { LoggedUser } from 'src/auth/logged-user.decorator';
 
 const { userType } = enums;
 
