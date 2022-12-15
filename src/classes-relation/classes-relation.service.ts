@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { CreateClassesRelationDto } from './dto/create-classes-relation.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from 'src/user/entities/user.entity';
 import { handleError } from 'src/utils/errorHandlers/customErrorList';
+import { CreateClassesRelationDto } from './dto/create-classes-relation.dto';
 
 @Injectable()
 export class ClassesRelationService {
@@ -56,10 +56,7 @@ export class ClassesRelationService {
     return this.prisma.usersSubjectClasses
       .findUnique({
         where: {
-          userId_subjectClassId: {
-            userId: id,
-            subjectClassId: id,
-          },
+          id,
         },
       })
       .then((relation) => relation)
@@ -70,10 +67,7 @@ export class ClassesRelationService {
     return this.prisma.usersSubjectClasses
       .delete({
         where: {
-          userId_subjectClassId: {
-            userId: id,
-            subjectClassId: id,
-          },
+          id,
         },
       })
       .then((relation) => relation)
