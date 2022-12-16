@@ -79,6 +79,11 @@ export class FormService {
           userId: true,
         },
       })
+      .then((forms) => {
+        return forms.sort((a, b) => {
+          return a.updatedAt > b.updatedAt ? -1 : 1;
+        });
+      })
       .catch(handleError);
   }
 
@@ -103,7 +108,12 @@ export class FormService {
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
-    return form;
+    const ordered = form.questions.sort((a, b) => a.order - b.order);
+
+    return {
+      ...form,
+      questions: ordered,
+    };
   }
 
   async update(id: string, dto: UpdateFormDto, user: User) {
@@ -129,6 +139,47 @@ export class FormService {
           id,
         },
         data,
+      })
+      .then(async (form) => {
+        if (!dto.questions || dto.questions.length === 0) {
+          return form;
+        }
+
+        dto.questions.forEach(async (question) => {
+          if (question.id) {
+            await this.prisma.question.update({
+              where: {
+                id: question.id,
+              },
+              data: {
+                ...question,
+              },
+            });
+          } else {
+            await this.prisma.question.create({
+              data: {
+                ...question,
+                formId: form.id,
+              },
+            });
+          }
+        });
+
+        return await this.prisma.form.findUnique({
+          where: {
+            id: form.id,
+          },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            random: true,
+            createdAt: true,
+            updatedAt: true,
+            questions: true,
+            userId: true,
+          },
+        });
       })
       .catch(handleError);
   }

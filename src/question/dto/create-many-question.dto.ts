@@ -1,8 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { ObjectValidator } from './questions-json.decorator';
 
 export class CreateManyQuestionDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Question id',
+    example: '1',
+  })
+  id?: string;
+
   @IsBoolean()
   @IsNotEmpty()
   @ApiProperty({
@@ -20,7 +34,7 @@ export class CreateManyQuestionDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     description: 'Question subtitle',
     example: 'Question 1 subtitle',
@@ -47,7 +61,7 @@ export class CreateManyQuestionDto {
   random: boolean;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     description: 'Question image',
     example: 'https://example.com/image.png',
