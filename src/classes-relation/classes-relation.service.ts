@@ -1,22 +1,76 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from 'src/user/entities/user.entity';
+import { handleError } from 'src/utils/errorHandlers/customErrorList';
 import { CreateClassesRelationDto } from './dto/create-classes-relation.dto';
-import { UpdateClassesRelationDto } from './dto/update-classes-relation.dto';
 
 @Injectable()
 export class ClassesRelationService {
-  create(createClassesRelationDto: CreateClassesRelationDto) {
-    return 'This action adds a new classesRelation';
+  constructor(private readonly prisma: PrismaService) {}
+
+  create(dto: CreateClassesRelationDto, userLogged: User) {
+    const userVerify = this.prisma.user.findUnique({
+      where: {
+        id: dto.userId,
+      },
+    });
+
+    if (!userVerify) {
+      throw new BadRequestException('Usuário não encontrado!');
+    }
+
+    const classVerify = this.prisma.subjectClass.findUnique({
+      where: {
+        id: dto.subjectClassId,
+      },
+    });
+
+    if (!classVerify) {
+      throw new BadRequestException('Classe não encontrada!');
+    }
+
+    return this.prisma.usersSubjectClasses
+      .create({
+        data: {
+          assignedBy: userLogged.name,
+          user: {
+            connect: {
+              id: dto.userId,
+            },
+          },
+          subjectClass: {
+            connect: {
+              id: dto.subjectClassId,
+            },
+          },
+        },
+      })
+      .then((relation) => {
+        console.log(relation);
+        return relation;
+      })
+      .catch(handleError);
   }
 
-  findAll() {
-    return `This action returns all classesRelation`;
+  findOne(id: string) {
+    return this.prisma.usersSubjectClasses
+      .findUnique({
+        where: {
+          id,
+        },
+      })
+      .then((relation) => relation)
+      .catch(handleError);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} classesRelation`;
-  }
-
-  delete(id: number) {
-    return `This action removes a #${id} classesRelation`;
+  delete(id: string) {
+    return this.prisma.usersSubjectClasses
+      .delete({
+        where: {
+          id,
+        },
+      })
+      .then((relation) => relation)
+      .catch(handleError);
   }
 }
