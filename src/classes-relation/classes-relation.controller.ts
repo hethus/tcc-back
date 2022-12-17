@@ -1,7 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { LoggedUser } from 'src/auth/logged-user.decorator';
+import { isAllowed } from 'src/lib/authLib';
+import { User } from 'src/user/entities/user.entity';
+import enums from '../lib/enumLib';
 import { ClassesRelationService } from './classes-relation.service';
 import { CreateClassesRelationDto } from './dto/create-classes-relation.dto';
 
+const { userType } = enums;
+
+@ApiTags('Classes-Relation')
 @Controller('classes-relation')
 export class ClassesRelationController {
   constructor(
@@ -9,22 +26,30 @@ export class ClassesRelationController {
   ) {}
 
   @Post()
-  create(@Body() createClassesRelationDto: CreateClassesRelationDto) {
-    return this.classesRelationService.create(createClassesRelationDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.classesRelationService.findAll();
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new relation' })
+  create(
+    @Body() dto: CreateClassesRelationDto,
+    @LoggedUser() userLogged: User,
+  ) {
+    isAllowed([userType.admin.value, userType.teacher.value], userLogged);
+    return this.classesRelationService.create(dto, userLogged);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Find a relation' })
   findOne(@Param('id') id: string) {
-    return this.classesRelationService.findOne(+id);
+    return this.classesRelationService.findOne(id);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a relation' })
   delete(@Param('id') id: string) {
-    return this.classesRelationService.delete(+id);
+    return this.classesRelationService.delete(id);
   }
 }

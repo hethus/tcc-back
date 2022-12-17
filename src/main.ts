@@ -24,6 +24,7 @@ async function bootstrap() {
     .addTag('Auth')
     .addTag('Users')
     .addTag('Classes')
+    .addTag('Classes-Relation')
     .addTag('Public')
     .addBearerAuth()
     .build();

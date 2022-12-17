@@ -118,6 +118,12 @@ export class QuestionService {
     });
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
+    this.prisma.usersSubjectClasses.deleteMany({
+      where: {
+        subjectClassId: id,
+        userId: user.id,
+      },
+    });
 
     return await this.prisma.question
       .delete({
