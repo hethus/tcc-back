@@ -8,6 +8,7 @@ export const users: Prisma.UserCreateInput[] = [
     registration: '1234567891',
     userType: 'admin',
     password: 'teste',
+    newUser: false,
   },
   {
     name: 'Teste-teacher',
@@ -15,6 +16,7 @@ export const users: Prisma.UserCreateInput[] = [
     registration: '123456789',
     userType: 'teacher',
     password: 'teste',
+    newUser: false,
   },
 ];
 
