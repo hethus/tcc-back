@@ -24,6 +24,9 @@ model SubjectClass {
   teacher             User                  @relation(fields: [teacherId], references: [id])
   teacherId           String                @db.Uuid
   UsersSubjectClasses UsersSubjectClasses[]
+  forms               FormIndicator[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now()) @updatedAt
 }
 
 model User {
@@ -81,6 +84,27 @@ model Question {
   form         Form     @relation(fields: [formId], references: [id])
   formId       String   @db.Uuid
   options      Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model Indicator {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  forms        FormIndicator[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model FormIndicator {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  formCopy     Json[]
+  indicator    Indicator @relation(fields: [indicatorId], references: [id])
+  indicatorId  String   @db.Uuid
+  repeat       String?
+  initialDate  DateTime
+  finalDate    DateTime
+  class        SubjectClass @relation(fields: [classId], references: [id])
+  classId      String   @db.Uuid
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
