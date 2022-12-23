@@ -6,12 +6,16 @@ import { isAllowedOrIsMe } from 'src/lib/authLib';
 import { User } from 'src/user/entities/user.entity';
 import enums from '../lib/enumLib';
 import { handleError } from 'src/utils/errorHandlers/customErrorList';
+import { QuestionService } from 'src/question/question.service';
 
 const { userType } = enums;
 
 @Injectable()
 export class FormService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly questionService: QuestionService,
+  ) {}
 
   async create(dto: CreateFormDto, user: User) {
     const data = {
@@ -30,13 +34,8 @@ export class FormService {
           return form;
         }
 
-        await this.prisma.question.createMany({
-          data: dto.questions.map((question) => {
-            return {
-              ...question,
-              formId: form.id,
-            };
-          }),
+        dto.questions.forEach(async (question) => {
+          await this.questionService.create(question, form.id);
         });
 
         return await this.prisma.form
@@ -141,28 +140,14 @@ export class FormService {
         data,
       })
       .then(async (form) => {
-        if (!dto.questions || dto.questions.length === 0) {
-          return form;
-        }
+        await this.prisma.question.deleteMany({
+          where: {
+            formId: form.id,
+          },
+        });
 
         dto.questions.forEach(async (question) => {
-          if (question.id) {
-            await this.prisma.question.update({
-              where: {
-                id: question.id,
-              },
-              data: {
-                ...question,
-              },
-            });
-          } else {
-            await this.prisma.question.create({
-              data: {
-                ...question,
-                formId: form.id,
-              },
-            });
-          }
+          await this.questionService.create(question, form.id);
         });
 
         return await this.prisma.form.findUnique({

@@ -13,7 +13,7 @@ const { userType } = enums;
 export class QuestionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateQuestionDto) {
+  async create(dto: CreateQuestionDto, formId: string) {
     return await this.prisma.question
       .create({
         data: {
@@ -27,7 +27,7 @@ export class QuestionService {
           mandatory: dto.mandatory,
           form: {
             connect: {
-              id: dto.formId,
+              id: formId,
             },
           },
           options: dto.options,
