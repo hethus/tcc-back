@@ -36,6 +36,16 @@ export class ClasseService {
             email,
           },
         },
+        select: {
+          id: true,
+          name: true,
+          semester: true,
+          subjectId: true,
+          subjectName: true,
+          teacher: true,
+          teacherId: true,
+          UsersSubjectClasses: true,
+        },
       })
       .then((classes) => classes)
       .catch(handleError);
