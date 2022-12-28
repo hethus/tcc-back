@@ -152,6 +152,7 @@ model Response {
   evaluationId String     @db.Uuid
   user         User       @relation(fields: [userId], references: [id])
   userId       String     @db.Uuid
+  answers      Json
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
 }
