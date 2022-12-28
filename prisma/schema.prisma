@@ -24,7 +24,7 @@ model SubjectClass {
   teacher             User                  @relation(fields: [teacherId], references: [id])
   teacherId           String                @db.Uuid
   UsersSubjectClasses UsersSubjectClasses[]
-  forms               FormIndicator[]
+  evaluations         Evaluation[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now()) @updatedAt
 }
@@ -44,6 +44,10 @@ model User {
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @default(now()) @updatedAt
   SubjectClass SubjectClass[]
+  indicators   Indicator[]
+  methodology  Methodology[]
+  group        Group[]
+  Response     Response[]
 }
 
 model UsersSubjectClasses {
@@ -59,15 +63,18 @@ model UsersSubjectClasses {
 }
 
 model Form {
-  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
   random      Boolean
   questions   Question[]
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String     @db.Uuid
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+  evaluation  Evaluation?
+  Indicator   Indicator?  @relation(fields: [indicatorId], references: [id])
+  indicatorId String?     @db.Uuid
 }
 
 model Question {
@@ -88,23 +95,63 @@ model Question {
   updatedAt    DateTime @default(now()) @updatedAt
 }
 
-model Indicator {
-  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  forms        FormIndicator[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+model Methodology {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.Uuid
+  label      String      @unique
+  indicators Indicator[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
 }
 
-model FormIndicator {
-  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  formCopy     Json[]
-  indicator    Indicator @relation(fields: [indicatorId], references: [id])
-  indicatorId  String   @db.Uuid
-  repeat       String?
-  initialDate  DateTime
-  finalDate    DateTime
-  class        SubjectClass @relation(fields: [classId], references: [id])
-  classId      String   @db.Uuid
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+model Group {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.Uuid
+  label      String      @unique
+  indicators Indicator[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+}
+
+model Indicator {
+  id            String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String
+  description   String
+  evaluations   Evaluation[]
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String       @db.Uuid
+  methodology   Methodology  @relation(fields: [methodologyId], references: [id])
+  methodologyId String       @db.Uuid
+  group         Group        @relation(fields: [groupId], references: [id])
+  groupId       String       @db.Uuid
+  forms         Form[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
+}
+
+model Evaluation {
+  id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  form        Form         @relation(fields: [formId], references: [id])
+  formId      String       @unique @db.Uuid
+  indicator   Indicator    @relation(fields: [indicatorId], references: [id]) //todo: lembrando que o form nao tera o idIndicator, quando for adicionado ao indicator, o form sera clonado e adicionado o idIndicator
+  indicatorId String       @db.Uuid
+  initialDate DateTime
+  finalDate   DateTime
+  class       SubjectClass @relation(fields: [classId], references: [id])
+  classId     String       @db.Uuid
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+  Response    Response[]
+}
+
+model Response {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+  evaluationId String     @db.Uuid
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String     @db.Uuid
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 }

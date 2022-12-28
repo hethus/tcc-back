@@ -8,6 +8,7 @@ import { FormModule } from './form/form.module';
 import { QuestionModule } from './question/question.module';
 import { ClasseModule } from './classe/classe.module';
 import { ClassesRelationModule } from './classes-relation/classes-relation.module';
+import { IndicatorModule } from './indicator/indicator.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ClassesRelationModule } from './classes-relation/classes-relation.modul
     QuestionModule,
     ClasseModule,
     ClassesRelationModule,
+    IndicatorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
