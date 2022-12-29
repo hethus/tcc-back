@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { isAllowedOrIsMe } from 'src/lib/authLib';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from 'src/user/entities/user.entity';
@@ -45,6 +45,10 @@ export class QuestionService {
       })
       .catch(handleError);
 
+    if (!question) {
+      throw new NotFoundException('Questão não encontrada');
+    }
+
     const form = await this.prisma.form.findUnique({
       where: {
         id: question.formId,
@@ -53,6 +57,10 @@ export class QuestionService {
         userId: true,
       },
     });
+
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
@@ -68,6 +76,10 @@ export class QuestionService {
       })
       .catch(handleError);
 
+    if (!question) {
+      throw new NotFoundException('Questão não encontrada');
+    }
+
     const form = await this.prisma.form.findUnique({
       where: {
         id: question.formId,
@@ -76,6 +88,10 @@ export class QuestionService {
         userId: true,
       },
     });
+
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
@@ -108,6 +124,10 @@ export class QuestionService {
       })
       .catch(handleError);
 
+    if (!question) {
+      throw new NotFoundException('Questão não encontrada');
+    }
+
     const form = await this.prisma.form.findUnique({
       where: {
         id: question.formId,
@@ -117,7 +137,12 @@ export class QuestionService {
       },
     });
 
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
+
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
+
     this.prisma.usersSubjectClasses.deleteMany({
       where: {
         subjectClassId: id,

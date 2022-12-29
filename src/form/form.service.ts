@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFormDto } from './dto/create-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
@@ -59,14 +59,23 @@ export class FormService {
       .catch(handleError);
   }
 
-  async findAll(email: string) {
+  async findAll(email: string, withIndicator: string) {
+    const where =
+      withIndicator === 'true'
+        ? {
+            user: {
+              email,
+            },
+          }
+        : {
+            user: {
+              email,
+            },
+            indicatorId: null,
+          };
     return await this.prisma.form
       .findMany({
-        where: {
-          user: {
-            email,
-          },
-        },
+        where,
         select: {
           id: true,
           name: true,
@@ -76,6 +85,7 @@ export class FormService {
           updatedAt: true,
           questions: true,
           userId: true,
+          indicatorId: withIndicator === 'true' ? true : false,
         },
       })
       .then((forms) => {
@@ -105,6 +115,10 @@ export class FormService {
       })
       .catch(handleError);
 
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
+
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
     const ordered = form.questions.sort((a, b) => a.order - b.order);
@@ -123,6 +137,10 @@ export class FormService {
         },
       })
       .catch(handleError);
+
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
@@ -177,6 +195,10 @@ export class FormService {
         },
       })
       .catch(handleError);
+
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
