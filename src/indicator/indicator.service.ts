@@ -215,7 +215,7 @@ export class IndicatorService {
   }
 
   async findAll(email: string) {
-    return await this.prisma.indicator.findMany({
+    const indicators = await this.prisma.indicator.findMany({
       where: {
         user: {
           email,
@@ -233,6 +233,12 @@ export class IndicatorService {
         forms: true,
       },
     });
+
+    const indicatorsOrdered = indicators.sort((a, b) => {
+      return a.createdAt > b.createdAt ? -1 : 1;
+    });
+
+    return indicatorsOrdered;
   }
 
   async findOne(id: string, user: User) {
