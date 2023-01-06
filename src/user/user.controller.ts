@@ -65,11 +65,13 @@ export class UserController {
     return this.userService.changePassword(tokenCrypt, dto);
   }
 
-  /*   @Get()
+  @Get('all')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Find all users by email logged user' })
   findAll() {
-    return this.userService.findAll();
+    return this.userService.findAll()
   }
-  */
 
   @Get()
   @UseGuards(AuthGuard())

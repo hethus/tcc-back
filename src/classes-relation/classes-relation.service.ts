@@ -44,6 +44,34 @@ export class ClassesRelationService {
             },
           },
         },
+        select: {
+          id: true,
+          assignedBy: true,
+          assignedAt: true,
+          subjectClassId: true,
+          subjectClass: {
+            select: {
+              id: true,
+              name: true,
+              teacher: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  registration: true,
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              registration: true,
+            },
+          },
+        },
       })
       .then((relation) => {
         console.log(relation);
@@ -57,6 +85,34 @@ export class ClassesRelationService {
       .findUnique({
         where: {
           id,
+        },
+        select: {
+          id: true,
+          assignedBy: true,
+          assignedAt: true,
+          subjectClassId: true,
+          subjectClass: {
+            select: {
+              id: true,
+              name: true,
+              teacher: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  registration: true,
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              registration: true,
+            },
+          },
         },
       })
       .then((relation) => relation)

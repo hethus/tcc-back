@@ -106,14 +106,76 @@ export class UserService {
       .catch(handleError);
   }
 
-  /*   findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return this.prisma.user
+      .findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          registration: true,
+          takenclasses: {
+            select: {
+              id: true,
+              subjectClass: {
+                select: {
+                  id: true,
+                  name: true,
+                  semester: true,
+                  subjectName: true,
+                  teacher: {
+                    select: {
+                      name: true,
+                      email: true,
+                      registration: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+      .then((user) => user)
+      .catch(handleError);
   }
-  */
 
   async findLogged(user: User) {
     const userLogged = await this.prisma.user.findUnique({
-      where: { id: user.id },
+      where: {
+        id: user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        registration: true,
+        userType: true,
+        takenclasses: {
+          select: {
+            id: true,
+            subjectClass: {
+              select: {
+                id: true,
+                name: true,
+                semester: true,
+                subjectName: true,
+                teacher: {
+                  select: {
+                    name: true,
+                    email: true,
+                    registration: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!userLogged) {
@@ -129,7 +191,38 @@ export class UserService {
 
   async findOne(email: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        registration: true,
+        userType: true,
+        takenclasses: {
+          select: {
+            id: true,
+            subjectClass: {
+              select: {
+                id: true,
+                name: true,
+                semester: true,
+                subjectName: true,
+                teacher: {
+                  select: {
+                    name: true,
+                    email: true,
+                    registration: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) {

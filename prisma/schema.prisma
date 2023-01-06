@@ -1,13 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator erd {
@@ -15,14 +7,19 @@ generator erd {
   output   = "../entity_diagram.pdf"
 }
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model SubjectClass {
   id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name                String // nome da turma
-  subjectName         String // nome da disciplina
+  name                String
+  subjectName         String
   subjectId           Int
   semester            String
-  teacher             User                  @relation(fields: [teacherId], references: [id])
   teacherId           String                @db.Uuid
+  teacher             User                  @relation(fields: [teacherId], references: [id])
   UsersSubjectClasses UsersSubjectClasses[]
 }
 
@@ -32,39 +29,37 @@ model User {
   name         String
   password     String
   token        String?
-  tokenChange  String?
   registration String                @unique
-  takenclasses UsersSubjectClasses[]
-  forms        Form[]
   userType     String
-  newUser      Boolean               @default(true)
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @default(now()) @updatedAt
+  newUser      Boolean               @default(true)
+  tokenChange  String?
+  forms        Form[]
   SubjectClass SubjectClass[]
+  takenclasses UsersSubjectClasses[]
 }
 
 model UsersSubjectClasses {
-  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user           User         @relation(fields: [userId], references: [id])
-  userId         String       @db.Uuid // relation scalar field (used in the `@relation` attribute above)
-  subjectClass   SubjectClass @relation(fields: [subjectClassId], references: [id])
-  subjectClassId String       @db.Uuid // relation scalar field (used in the `@relation` attribute above)
+  userId         String       @db.Uuid
+  subjectClassId String       @db.Uuid
   assignedAt     DateTime     @default(now())
   assignedBy     String
-
-  // @@id([userId, subjectClassId])
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  subjectClass   SubjectClass @relation(fields: [subjectClassId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Form {
   id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
-  random      Boolean
-  questions   Question[]
-  user        User       @relation(fields: [userId], references: [id])
   userId      String     @db.Uuid
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @default(now()) @updatedAt
+  random      Boolean
+  user        User       @relation(fields: [userId], references: [id])
+  questions   Question[]
 }
 
 model Question {
@@ -73,14 +68,14 @@ model Question {
   title        String
   subtitle     String?
   style        Json?
-  random       Boolean
   image        String?
   order        Float
   type         String
   mandatory    Boolean
-  form         Form     @relation(fields: [formId], references: [id])
   formId       String   @db.Uuid
   options      Json?
+  random       Boolean
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
+  form         Form     @relation(fields: [formId], references: [id])
 }

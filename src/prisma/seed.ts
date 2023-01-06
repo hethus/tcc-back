@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 const seeds = Object.entries({
   ...require('./seed/01-user'),
+  ...require('./seed/02-classes'),
 });
 
 (async () => {
