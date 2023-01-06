@@ -256,7 +256,26 @@ export class IndicatorService {
           groupId: true,
           methodologyId: true,
           userId: true,
-          forms: true,
+          forms: {
+            select: {
+              id: true,
+              name: true,
+              evaluation: {
+                select: {
+                  id: true,
+                  createdAt: true,
+                  response: true,
+                  initialDate: true,
+                  finalDate: true,
+                  class: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       })
       .catch(handleError);
