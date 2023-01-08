@@ -173,6 +173,7 @@ export class UserService {
             },
           },
         },
+        token: true,
         createdAt: true,
         updatedAt: true,
       },
