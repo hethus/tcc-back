@@ -9,6 +9,7 @@ import {
 import { CreateManyQuestionDto } from 'src/question/dto/create-many-question.dto';
 import { Type } from 'class-transformer';
 import { ArrayValidator } from 'src/utils/array-validator.decorator';
+import { CreateQuestionDto } from 'src/question/dto/create-question.dto';
 
 export class CreateFormDto {
   @IsString()
@@ -68,5 +69,5 @@ export class CreateFormDto {
       },
     ],
   })
-  questions: CreateManyQuestionDto[];
+  questions: CreateQuestionDto[];
 }
