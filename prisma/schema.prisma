@@ -133,9 +133,9 @@ model Indicator {
 
 model Evaluations {
   id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  form        Form         @relation(fields: [formId], references: [id])
+  form        Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
   formId      String       @unique @db.Uuid
-  indicator   Indicator    @relation(fields: [indicatorId], references: [id]) //todo: lembrando que o form nao tera o idIndicator, quando for adicionado ao indicator, o form sera clonado e adicionado o idIndicator
+  indicator   Indicator    @relation(fields: [indicatorId], references: [id])
   indicatorId String       @db.Uuid
   initialDate DateTime
   finalDate   DateTime
