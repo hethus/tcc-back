@@ -26,13 +26,17 @@ const { userType } = enums;
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
-  @Post()
+  @Post('new/:formId')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new question in a form' })
-  create(@Body() dto: CreateQuestionDto, @LoggedUser() userLogged: User) {
+  create(
+    @Body() dto: CreateQuestionDto,
+    @LoggedUser() userLogged: User,
+    @Param('formId') formId: string,
+  ) {
     isAllowed([userType.admin.value, userType.teacher.value], userLogged);
-    return this.questionService.create(dto);
+    return this.questionService.create(dto, formId);
   }
 
   @Get(':id')
