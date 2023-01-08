@@ -14,7 +14,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import enums from '../lib/enumLib';
-import { isAllowed, isAllowedOrIsMe } from 'src/lib/authLib';
+import { isAllowed, isAllowedOrIsMeEmail } from 'src/lib/authLib';
 import { LoggedUser } from 'src/auth/logged-user.decorator';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -88,17 +88,17 @@ export class UserController {
     return this.userService.findOne(email);
   }
 
-  @Patch(':id')
+  @Patch(':email')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user' })
   update(
-    @Param('id') id: string,
+    @Param('email') email: string,
     @Body() dto: UpdateUserDto,
     @LoggedUser() user: User,
   ) {
-    isAllowedOrIsMe(userType.admin.value, user, id);
-    return this.userService.update(id, dto);
+    isAllowedOrIsMeEmail(userType.admin.value, user, email);
+    return this.userService.update(email, dto);
   }
 
   @Delete(':id')

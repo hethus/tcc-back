@@ -7,11 +7,17 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { FormService } from './form.service';
 import { CreateFormDto } from './dto/create-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/entities/user.entity';
 import { LoggedUser } from 'src/auth/logged-user.decorator';
@@ -34,13 +40,18 @@ export class FormController {
     return this.formService.create(dto, userLogged);
   }
 
-  @Get(':email')
+  @Get(':email/')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all forms by user' })
-  findAll(@Param('email') email: string, @LoggedUser() userLogged: User) {
+  @ApiQuery({ name: 'withIndicator', required: false, type: Boolean })
+  findAll(
+    @Param('email') email: string,
+    @LoggedUser() userLogged: User,
+    @Query('withIndicator') withIndicator: boolean,
+  ) {
     isAllowedOrIsMeEmail(userType.admin.value, userLogged, email);
-    return this.formService.findAll(email);
+    return this.formService.findAll(email, `${withIndicator}`);
   }
 
   @Get('one/:id')

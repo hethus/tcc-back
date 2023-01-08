@@ -398,104 +398,102 @@ export class UserService {
       .catch(handleError);
   }
 
-  async update(id: string, dto: UpdateUserDto) {
-    if (!id) {
+  async update(email: string, dto: UpdateUserDto) {
+    if (!email) {
       throw new BadRequestException('Id é obrigatório');
     }
 
     try {
       const userVerify = await this.prisma.user.findUnique({
-        where: { id },
+        where: { email },
       });
 
       if (!userVerify) {
         throw new BadRequestException('Usuário não encontrado');
       }
 
-      if (!dto.email) {
+      if (!dto.email || dto.email === userVerify.email) {
         const data = await this.prisma.user.update({
-          where: { id },
+          where: { email },
           data: dto,
         });
         const { password: userPassword, ...user } = await validateData(data);
         return user;
       }
 
-      if (dto.email) {
-        const registration = dto.registration || userVerify.registration;
+      const data = {
+        email: dto.email,
+        userType: dto.userType || userVerify.userType,
+        name: dto.name || userVerify.name,
+        registration: dto.registration || userVerify.registration,
+        password: dto.registration
+          ? await tokenLib.generatePasswordHash(dto.registration)
+          : userVerify.password,
+        newUser: true,
+      };
 
-        const data = {
-          email: dto.email,
-          userType: dto.userType || userVerify.userType,
-          name: dto.name || userVerify.name,
-          registration,
-          password: await tokenLib.generatePasswordHash(registration),
-          newUser: true,
-        };
+      return this.prisma.user
+        .update({
+          where: { email },
+          data,
+        })
+        .then(async ({ password, ...updatedUser }) => {
+          const token = this.jwtService.sign(
+            {
+              id: updatedUser.id,
+              email: updatedUser.email,
+              name: updatedUser.name,
+              registration: updatedUser.registration,
+            },
+            {
+              expiresIn: '2h',
+            },
+          );
 
-        return this.prisma.user
-          .update({
-            where: { id },
-            data,
-          })
-          .then(async ({ password, ...updatedUser }) => {
-            const token = this.jwtService.sign(
-              {
-                id: updatedUser.id,
-                email: updatedUser.email,
-                name: updatedUser.name,
-                registration: updatedUser.registration,
-              },
-              {
-                expiresIn: '2h',
-              },
-            );
+          const tokenCrypt = crypto.AES.encrypt(
+            token,
+            process.env.JWT_NEW_USER_SECRET,
+          ).toString();
 
-            const tokenCrypt = crypto.AES.encrypt(
-              token,
-              process.env.JWT_NEW_USER_SECRET,
-            ).toString();
+          const tokenUrl = await cryptUrl(tokenCrypt);
 
-            const tokenUrl = await cryptUrl(tokenCrypt);
+          await this.prisma.user.update({
+            where: { email: updatedUser.email },
+            data: { tokenChange: tokenCrypt },
+          });
 
-            await this.prisma.user.update({
-              where: { email: updatedUser.email },
-              data: { tokenChange: tokenCrypt },
-            });
+          const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            service: 'gmail',
+            secure: true,
+            auth: {
+              user: process.env.USER_EMAIL,
+              pass: process.env.USER_PASSWORD,
+            },
+          });
 
-            const transporter = nodemailer.createTransport({
-              host: 'smtp.gmail.com',
-              port: 587,
-              service: 'gmail',
-              secure: true,
-              auth: {
-                user: process.env.USER_EMAIL,
-                pass: process.env.USER_PASSWORD,
-              },
-            });
-
-            const mailData = {
-              from: `TCC <${process.env.USER_EMAIL}>`,
-              to: updatedUser.email,
-              subject: 'Alteração de email',
-              text: `Olá ${updatedUser.name}, seu cadastro foi atualizado, como o email foi alterado, sua senha foi resetada também. Sua senha é ${updatedUser.registration}
+          const mailData = {
+            from: `TCC <${process.env.USER_EMAIL}>`,
+            to: updatedUser.email,
+            subject: 'Alteração de email',
+            text: `Olá ${updatedUser.name}, seu cadastro foi atualizado, como o email foi alterado, sua senha foi resetada também. Sua senha é ${updatedUser.registration}
                       aproveite e valide a sua senha aqui: {AREA EM DESENVOLVIMENTO} localhost/user/first-access/${tokenUrl}.`, // aqui vai a url do front que aponta para a rota firstAccess, se o user n respeitar isso e tentar fazer login, o front vai redirecionar para a mesma pagina de cadastro de senha
-            };
+          };
 
-            transporter.sendMail(mailData, function (err, info) {
-              if (err) {
-                console.log(err);
+          transporter.sendMail(mailData, function (err, info) {
+            if (err) {
+              console.log(err);
 
-                throw new BadRequestException('Error sending email');
-              } else {
-                console.log(info);
-              }
-            });
+              throw new BadRequestException('Error sending email');
+            } else {
+              console.log(info);
+            }
+          });
 
-            return updatedUser;
-          })
-          .catch(handleError);
-      }
+          return updatedUser;
+        })
+        .catch(handleError);
     } catch (error) {
       return handleError(error);
     }
