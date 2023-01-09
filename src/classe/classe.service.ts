@@ -1,4 +1,4 @@
-// eslint-disable-next-line prettier/prettier
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { CreateClasseDto } from './dto/create-classe.dto';
 import { UpdateClasseDto } from './dto/update-classe.dto';
