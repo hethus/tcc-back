@@ -1,7 +1,3 @@
--- AlterTable
-ALTER TABLE "SubjectClass" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
 -- CreateTable
 CREATE TABLE "Indicator" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
