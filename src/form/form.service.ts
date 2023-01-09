@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFormDto } from './dto/create-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
@@ -6,12 +6,16 @@ import { isAllowedOrIsMe } from 'src/lib/authLib';
 import { User } from 'src/user/entities/user.entity';
 import enums from '../lib/enumLib';
 import { handleError } from 'src/utils/errorHandlers/customErrorList';
+import { QuestionService } from 'src/question/question.service';
 
 const { userType } = enums;
 
 @Injectable()
 export class FormService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly questionService: QuestionService,
+  ) {}
 
   async create(dto: CreateFormDto, user: User) {
     const data = {
@@ -30,13 +34,8 @@ export class FormService {
           return form;
         }
 
-        await this.prisma.question.createMany({
-          data: dto.questions.map((question) => {
-            return {
-              ...question,
-              formId: form.id,
-            };
-          }),
+        dto.questions.forEach(async (question) => {
+          await this.questionService.create(question, form.id);
         });
 
         return await this.prisma.form
@@ -60,14 +59,23 @@ export class FormService {
       .catch(handleError);
   }
 
-  async findAll(email: string) {
+  async findAll(email: string, withIndicator: string) {
+    const where =
+      withIndicator === 'true'
+        ? {
+            user: {
+              email,
+            },
+          }
+        : {
+            user: {
+              email,
+            },
+            indicatorId: null,
+          };
     return await this.prisma.form
       .findMany({
-        where: {
-          user: {
-            email,
-          },
-        },
+        where,
         select: {
           id: true,
           name: true,
@@ -77,6 +85,7 @@ export class FormService {
           updatedAt: true,
           questions: true,
           userId: true,
+          indicatorId: withIndicator === 'true' ? true : false,
         },
       })
       .then((forms) => {
@@ -106,6 +115,10 @@ export class FormService {
       })
       .catch(handleError);
 
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
+
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
     const ordered = form.questions.sort((a, b) => a.order - b.order);
@@ -125,6 +138,10 @@ export class FormService {
       })
       .catch(handleError);
 
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
+
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 
     const data = {
@@ -141,28 +158,14 @@ export class FormService {
         data,
       })
       .then(async (form) => {
-        if (!dto.questions || dto.questions.length === 0) {
-          return form;
-        }
+        await this.prisma.question.deleteMany({
+          where: {
+            formId: form.id,
+          },
+        });
 
         dto.questions.forEach(async (question) => {
-          if (question.id) {
-            await this.prisma.question.update({
-              where: {
-                id: question.id,
-              },
-              data: {
-                ...question,
-              },
-            });
-          } else {
-            await this.prisma.question.create({
-              data: {
-                ...question,
-                formId: form.id,
-              },
-            });
-          }
+          await this.questionService.create(question, form.id);
         });
 
         return await this.prisma.form.findUnique({
@@ -192,6 +195,10 @@ export class FormService {
         },
       })
       .catch(handleError);
+
+    if (!form) {
+      throw new NotFoundException('Formulário não encontrado');
+    }
 
     isAllowedOrIsMe(userType.admin.value, user, form.userId);
 

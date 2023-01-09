@@ -21,6 +21,9 @@ model SubjectClass {
   teacherId           String                @db.Uuid
   teacher             User                  @relation(fields: [teacherId], references: [id])
   UsersSubjectClasses UsersSubjectClasses[]
+  evaluations         Evaluations[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now()) @updatedAt
 }
 
 model User {
@@ -38,6 +41,10 @@ model User {
   forms        Form[]
   SubjectClass SubjectClass[]
   takenclasses UsersSubjectClasses[]
+  indicators   Indicator[]
+  methodology  Methodology[]
+  group        Group[]
+  response     Response[]
 }
 
 model UsersSubjectClasses {
@@ -51,15 +58,18 @@ model UsersSubjectClasses {
 }
 
 model Form {
-  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
-  userId      String     @db.Uuid
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
   random      Boolean
-  user        User       @relation(fields: [userId], references: [id])
   questions   Question[]
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+  evaluation  Evaluations[]
+  Indicator   Indicator?  @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+  indicatorId String?     @db.Uuid
 }
 
 model Question {
@@ -72,10 +82,72 @@ model Question {
   order        Float
   type         String
   mandatory    Boolean
+  form         Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   formId       String   @db.Uuid
   options      Json?
   random       Boolean
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
-  form         Form     @relation(fields: [formId], references: [id])
+}
+
+model Methodology {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.Uuid
+  label      String      @unique
+  indicators Indicator[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+}
+
+model Group {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.Uuid
+  label      String      @unique
+  indicators Indicator[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+}
+
+model Indicator {
+  id            String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String
+  description   String
+  evaluations   Evaluations[]
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String       @db.Uuid
+  methodology   Methodology  @relation(fields: [methodologyId], references: [id])
+  methodologyId String       @db.Uuid
+  group         Group        @relation(fields: [groupId], references: [id])
+  groupId       String       @db.Uuid
+  forms         Form[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
+}
+
+model Evaluations {
+  id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  form        Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId      String       @unique @db.Uuid
+  indicator   Indicator    @relation(fields: [indicatorId], references: [id])
+  indicatorId String       @db.Uuid
+  initialDate DateTime
+  finalDate   DateTime
+  class       SubjectClass @relation(fields: [classId], references: [id])
+  classId     String       @db.Uuid
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+  response    Response[]
+}
+
+model Response {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  evaluation   Evaluations @relation(fields: [evaluationId], references: [id])
+  evaluationId String     @db.Uuid
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String     @db.Uuid
+  answers      Json
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 }
